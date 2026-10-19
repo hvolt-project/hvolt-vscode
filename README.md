@@ -2,6 +2,8 @@
 
 ArkTS support for [hvolt](https://github.com/hvolt-project/hvolt) projects.
 
+Requires `hvolt` **26.0.0** or newer (the first release with `hvolt lsp --stdio`).
+
 - Syntax highlighting: TypeScript comes from VS Code's built-in `source.ts` grammar; the ArkTS additions
   (decorators such as `@Entry`/`@State`, the `struct` keyword, `$r(...)` resources, ArkUI components)
   are defined in `syntaxes/ets.tmLanguage.json`.

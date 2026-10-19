@@ -1,0 +1,27 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  extension:
+    name: typecheck, build, tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: node build.mjs
+      - run: node --test test/
+
+      # The manifest is what the Marketplace shows and what the host acts on, so it is
+      # checked on every pull request rather than at release time.
+      - run: npx --yes @vscode/vsce@3 ls

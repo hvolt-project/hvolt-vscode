@@ -44,12 +44,22 @@ test("the client launches `hvolt lsp --stdio` from the configured binary", () =>
 });
 
 test("server commands do not collide with the commands the extension contributes", () => {
-  // vscode-languageclient registers every command the server advertises; a duplicate
-  // id throws during activation (measured: ExecuteCommandFeature.register failed).
-  const serverSource = readFileSync(join(dir, "..", "..", "lsp", "src", "server.ts"), "utf8");
-  const declared = /executeCommandProvider: \{ commands: \[([^\]]+)\] \}/.exec(serverSource);
-  assert.ok(declared, "the server no longer declares executeCommandProvider in the expected form");
-  const serverCommands = [...declared[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+  // vscode-languageclient registers every command the server advertises; a duplicate id
+  // throws during activation (measured: ExecuteCommandFeature.register failed).
+  //
+  // The server lives in hvolt-project/hvolt, so this repository carries the list it
+  // advertised at the time of the last check. Point HVOLT_REPO at a checkout of that
+  // repository to verify against the source instead of the snapshot; CI uses the snapshot,
+  // and a new server command only has to be added here, never removed.
+  const SERVER_COMMANDS = ["hvolt.executeCli"];
+  const checkout = process.env.HVOLT_REPO;
+  let serverCommands = SERVER_COMMANDS;
+  if (checkout) {
+    const serverSource = readFileSync(join(checkout, "lsp", "src", "server.ts"), "utf8");
+    const declared = /executeCommandProvider: \{ commands: \[([^\]]+)\] \}/.exec(serverSource);
+    assert.ok(declared, "the server no longer declares executeCommandProvider in the expected form");
+    serverCommands = [...declared[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]);
+  }
   const contributed = manifest.contributes.commands.map((c) => c.command);
   for (const command of serverCommands) {
     assert.ok(
