@@ -5,3 +5,6 @@ build.mjs
 tsconfig.json
 package-lock.json
 *.vsix
+.github/**
+.gitignore
+RELEASING.md
